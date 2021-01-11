@@ -79,100 +79,124 @@ end
 
 def prompt(key, lang='en')
   prompt = PROMPT_FILE[lang][key]
-  puts "=> #{prompt}"
+  "=> #{prompt}"
 end
 
-prompt 'welcome'
+puts prompt 'welcome'
 
 lang = ''
 loop do
-  prompt 'lang'
+  puts prompt 'lang'
   lang = gets.chomp
-  if ['en', 'es'].include?(lang)
+  if ['1', '2'].include?(lang)
+    case lang
+    when '1'
+      lang = 'en'
+    when '2'
+      lang = 'es'
+    end
     break
   else
-    prompt 'invalid_input_lang'
+    puts prompt 'invalid_input_lang'
   end
 end
 
 users_name = ''
 loop do
-  prompt 'enter_users_name', lang
+  puts prompt 'enter_users_name', lang
   users_name = gets.chomp
   if users_name.empty?
-    prompt 'invalid_input'
+    puts prompt 'invalid_input'
   else
     puts "#{prompt('hello', lang)} #{users_name}"
     break
   end
 end
 
-loan_amount = nil
 loop do
-  prompt 'enter_amount', lang
-  loan_amount = gets.chomp
-  if float?(loan_amount)
-    loan_amount = loan_amount.to_f
-    break
-  else
-    prompt 'invalid_number', lang
-  end
-end
-
-interest_rate = nil
-loop do
-  prompt 'enter_interest_rate', lang
-  interest_rate = gets.chomp
-  if float?(interest_rate)
-    interest_rate = interest_rate.to_f / 100 # convert whole num percent to decimal
-    break
-  else
-    prompt 'invalid_number', lang
-  end
-end
-
-interest_rate_timing = nil
-loop do
-  prompt 'enter_interest_rate_timing', lang
-  interest_rate_timing = gets.chomp.downcase
-  if ['y', 'a', 'm'].include?(interest_rate_timing)
-    if interest_rate_timing == 'm'
-      interest_rate = interest_rate / 12
+  loan_amount = ''  
+  loop do
+    puts prompt 'enter_amount', lang
+    loan_amount = gets.chomp
+    if float?(loan_amount)
+      loan_amount = loan_amount.to_f
       break
     else
+      puts prompt 'invalid_number', lang
+    end
+  end
+
+  interest_rate = ''
+  loop do
+    puts prompt 'enter_interest_rate', lang
+    interest_rate = gets.chomp
+    if float?(interest_rate)
+      interest_rate = interest_rate.to_f / 100 # convert whole num percent to decimal
       break
+    else
+      puts prompt 'invalid_number', lang
     end
-  else
-    prompt 'enter_interest_rate_timing_error', lang
   end
-end
 
-loan_duration = nil
-loop do
-  prompt 'enter_loan_duration', lang
-  loan_duration = gets.chomp
-  if integer?(loan_duration)
-    loan_duration = loan_duration.to_i
-    break
-  else
-    prompt 'invalid_number'
-  end
-end
-
-loan_duration_timing = nil
-loop do
-  prompt 'enter_loan_duration_timing', lang
-  loan_duration_timing = gets.chomp.downcase
-  if ['m', 'y', 'a'].include?(loan_duration_timing)
-    if loan_duration_timing == 'y' || loan_duration_timing == 'a'
-      loan_duration = loan_duration * 12
+  interest_rate_timing = ''
+  loop do
+    puts prompt 'enter_interest_rate_timing', lang
+    interest_rate_timing = gets.chomp.downcase
+    if ['y', 'a', 'm'].include?(interest_rate_timing)
+      if interest_rate_timing == 'm'
+        interest_rate = interest_rate / 12
+        break
+      else
+        break
+      end
+    else
+      puts prompt 'enter_interest_rate_timing_error', lang
     end
-    break
-  else
-    prompt 'invalid_input', lang
+  end
+
+  loan_duration = ''
+  loop do
+    puts prompt 'enter_loan_duration', lang
+    loan_duration = gets.chomp
+    if integer?(loan_duration)
+      loan_duration = loan_duration.to_i
+      break
+    else
+      puts prompt 'invalid_number'
+    end
+  end
+
+  loan_duration_timing = ''
+  loop do
+    puts prompt 'enter_loan_duration_timing', lang
+    loan_duration_timing = gets.chomp.downcase
+    if ['m', 'y', 'a'].include?(loan_duration_timing)
+      if loan_duration_timing == 'y' || loan_duration_timing == 'a'
+        loan_duration = loan_duration * 12
+      end
+      break
+    else
+      puts prompt 'invalid_input', lang
+    end
+  end
+
+  monthly_payment = (loan_amount * (interest_rate / (1 - (1 + interest_rate)**(-loan_duration)))).round(2)
+
+  puts "#{prompt('monthly_payment_amount', lang)} $#{monthly_payment}"
+
+  run_again = ''
+  loop do
+    puts prompt 'another_calculation', lang
+    run_again = gets.chomp.downcase
+
+    if ['y', 'n'].include?(run_again)
+      if run_again == 'n'
+        break
+      else
+        break
+      end
+    else
+      puts prompt 'invalid_input', lang
+    end
   end
 end
-
-monthly_payment = (loan_amount * (interest_rate / (1 - (1 + interest_rate)**(-loan_duration)))).round(2)
-
-puts "#{prompt('monthly_payment_amount', lang)} $#{monthly_payment}"

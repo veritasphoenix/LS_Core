@@ -1,6 +1,6 @@
 en:
   welcome: 'Welcome to the loan calculator!'
-  lang: "Would you like English or Español? ('en' for English, 'es' para Español)"
+  lang: "Would you like English or Español? (1 for English, 2 para Español)"
   invalid_input_lang: 'Invalid input. Entrada inválida.'
   enter_users_name: 'Please enter your name:'
   empty_name: 'Please enter your name: '
@@ -13,8 +13,9 @@ en:
   enter_loan_duration: 'Please enter the loan duration:'
   enter_loan_duration_timing: "Is that in years or months? Enter 'M' for months or 'Y' for years"
   monthly_payment_amount: 'Your monthly payment is: '
+  another_calculation: 'Would you like to make another calculation? (Y or N)'
 es:
-  get_users_name: 'Por favor, escriba su nombre:'
+  enter_users_name: 'Por favor, escriba su nombre:'
   empty_name: 'Por favor, escriba su nombre:'
   hello: 'Hola,'
   invalid_input: 'Entrada inválida.'
@@ -25,4 +26,5 @@ es:
   enter_loan_duration: 'Ingrese la duración del préstamo:'
   enter_loan_duration_timing: "¿Eso es en años o meses? Ingrese 'M' para meses o 'A' para años"
   monthly_payment_amount: 'Tu pago mensual es: '
+  another_calculation: '¿Le gustaría hacer otro cálculo? (S o N)'
   
