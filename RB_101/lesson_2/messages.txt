@@ -1,0 +1,8 @@
+1, Welcome to Calculator! Enter your name:
+2, What's the first number?
+3, Please enter a valid name!
+4, Hmm...that doesn't look like a valid number
+5, What's the second number?
+6, Must choose 1, 2, 3, 4
+7, Would you like to perform another calculation? (Y or N)
+8, Thank you for using Calculator. Goodbye.

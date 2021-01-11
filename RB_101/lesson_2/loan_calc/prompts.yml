@@ -1,0 +1,28 @@
+en:
+  welcome: 'Welcome to the loan calculator!'
+  lang: "Would you like English or Español? ('en' for English, 'es' para Español)"
+  invalid_input_lang: 'Invalid input. Entrada inválida.'
+  enter_users_name: 'Please enter your name:'
+  empty_name: 'Please enter your name: '
+  hello: 'Hello, '
+  invalid_input: 'Invalid input.'
+  invalid_number: 'Invalid number.'
+  enter_amount: 'Please enter the loan amount: '
+  enter_interest_rate: 'Please enter the interest rate for the loan: '
+  enter_interest_rate_timing: "Is that a monthly or yearly interest rate? Enter 'M' for monthly or 'Y' for yearly"
+  enter_loan_duration: 'Please enter the loan duration:'
+  enter_loan_duration_timing: "Is that in years or months? Enter 'M' for months or 'Y' for years"
+  monthly_payment_amount: 'Your monthly payment is: '
+es:
+  get_users_name: 'Por favor, escriba su nombre:'
+  empty_name: 'Por favor, escriba su nombre:'
+  hello: 'Hola,'
+  invalid_input: 'Entrada inválida.'
+  invalid_number: 'Número invalido.'
+  enter_amount: 'Ingrese el monto del préstamo:'
+  enter_interest_rate: 'Ingrese la tasa de interés del préstamo:'
+  enter_interest_rate_timing: "¿Es esa una tasa de interés mensual o anual? Ingrese 'M' para mensual o 'A' para anual"
+  enter_loan_duration: 'Ingrese la duración del préstamo:'
+  enter_loan_duration_timing: "¿Eso es en años o meses? Ingrese 'M' para meses o 'A' para años"
+  monthly_payment_amount: 'Tu pago mensual es: '
+  

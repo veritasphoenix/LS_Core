@@ -1,0 +1,26 @@
+lang: "English or Español? (type 'en' for English or 'es' for Español)"
+not_valid_language: "Please enter either 'en' or 'es'"
+en:
+  welcome: 'Welcome to Calculator! Enter your name:'
+  hello: 'Hello'
+  not_valid_name: 'Make sure to enter a valid name.'
+  first_number: "What's the first number?"
+  second_number: "What's the second number?"
+  not_valid_number: "Hmm...that doesn't look like a valid number"
+  choose_number: 'You must choose 1, 2, 3, 4'
+  two_numbers: 'the two numbers'
+  result: 'The result is'
+  another_calculation: 'Would you like to perform another calculation? (Y or N)'
+  thank_you: 'Thank you for using Calculator. Goodbye.'
+es:
+  welcome: 'Bienvenido a la calculadora! Entre su nombre:'
+  hello: 'Hola'
+  not_valid_name: 'Asegúrese de entrar un nombre válido.'
+  first_number: '¿Cual es el primer numero?'
+  second_number: '¿Cual es el segundo numero?'
+  not_valid_number: 'Hmm...eso no parece un número válido'
+  choose_number: 'Debe elegir 1, 2, 3, 4'
+  two_numbers: 'los dos números'
+  result: 'El resultado es'
+  another_calculation: '¿Le gustaría realizar otro cálculo? (S or N)'
+  thank_you: 'Gracias por usar Calculadora. Adiós.'
