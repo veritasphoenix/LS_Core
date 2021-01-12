@@ -1,11 +1,12 @@
+welcome: 'Welcome to the loan calculator!'
+lang: "Would you like English or Español? (1 for English, 2 para Español)"
 en:
-  welcome: 'Welcome to the loan calculator!'
-  lang: "Would you like English or Español? (1 for English, 2 para Español)"
   invalid_input_lang: 'Invalid input. Entrada inválida.'
   enter_users_name: 'Please enter your name:'
-  empty_name: 'Please enter your name: '
+  # empty_name: 'Please enter your name: '
   hello: 'Hello, '
   invalid_input: 'Invalid input.'
+  invalid_input_name: 'Invalid name entered.'
   invalid_number: 'Invalid number. Must enter a positive number.'
   enter_amount: 'Please enter the loan amount: '
   enter_interest_rate: 'Please enter the interest rate for the loan: '
@@ -17,9 +18,10 @@ en:
   another_calculation: 'Would you like to make another calculation? (Y or N)'
 es:
   enter_users_name: 'Por favor, escriba su nombre:'
-  empty_name: 'Por favor, escriba su nombre:'
+  # empty_name: 'Por favor, escriba su nombre:'
   hello: 'Hola,'
   invalid_input: 'Entrada inválida.'
+  invalid_input_name: 'Se ingresó un nombre no válido.'
   invalid_number: 'Número invalido. Debe ingresar un número positivo.'
   enter_amount: 'Ingrese el monto del préstamo:'
   enter_interest_rate: 'Ingrese la tasa de interés del préstamo:'

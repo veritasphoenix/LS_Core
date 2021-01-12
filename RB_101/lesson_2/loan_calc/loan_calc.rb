@@ -14,24 +14,51 @@ def prompt(key, lang='en')
   "=> #{prompt}"
 end
 
+def system_clear
+  system 'clear'
+end
+
+system_clear
+
 puts prompt 'welcome'
 
-lang = ''
-loop do
-  puts prompt 'lang'
-  lang = gets.chomp
-  if ['1', '2'].include?(lang)
-    case lang
-    when '1'
-      lang = 'en'
-    when '2'
-      lang = 'es'
+def get_lang
+  language = ''
+
+  loop do
+    puts prompt 'lang'
+    language = gets.chomp.strip
+    if ['1', '2'].include?(lang)
+      case lang
+      when '1' then language = 'en'
+      when '2' then language = 'es'
+      end
+      break
+    else
+      puts prompt 'invalid_input_lang'
     end
-    break
-  else
-    puts prompt 'invalid_input_lang'
   end
+  language
 end
+
+lang = get_lang
+
+
+# loop do
+#   puts prompt 'lang'
+#   lang = gets.chomp
+#   if ['1', '2'].include?(lang)
+#     case lang
+#     when '1'
+#       lang = 'en'
+#     when '2'
+#       lang = 'es'
+#     end
+#     break
+#   else
+#     puts prompt 'invalid_input_lang'
+#   end
+# end
 
 users_name = ''
 loop do
