@@ -3,8 +3,7 @@ lang: "Would you like English or Español? (1 for English, 2 para Español)"
 en:
   invalid_input_lang: 'Invalid input. Entrada inválida.'
   enter_users_name: 'Please enter your name:'
-  # empty_name: 'Please enter your name: '
-  hello: 'Hello, '
+  hello: 'Hello, %{name}'
   invalid_input: 'Invalid input.'
   invalid_input_name: 'Invalid name entered.'
   invalid_number: 'Invalid number. Must enter a positive number.'
@@ -14,12 +13,13 @@ en:
   enter_interest_rate_timing: "Is that a monthly or yearly interest rate? Enter 'M' for monthly or 'Y' for yearly"
   enter_loan_duration: 'Please enter the loan duration:'
   enter_loan_duration_timing: "Is that in years or months? Enter 'M' for months or 'Y' for years"
-  monthly_payment_amount: 'Your monthly payment is: '
+  monthly_payment_amount: 'Your monthly payment is: $%{amount}'
   another_calculation: 'Would you like to make another calculation? (Y or N)'
+  thank_you: 'Thank you, %{name}, for using the Mortgage Calculator!'
+  goodbye: 'Goodbye'
 es:
   enter_users_name: 'Por favor, escriba su nombre:'
-  # empty_name: 'Por favor, escriba su nombre:'
-  hello: 'Hola,'
+  hello: 'Hola,%{name}'
   invalid_input: 'Entrada inválida.'
   invalid_input_name: 'Se ingresó un nombre no válido.'
   invalid_number: 'Número invalido. Debe ingresar un número positivo.'
@@ -31,4 +31,6 @@ es:
   enter_loan_duration_timing: "¿Eso es en años o meses? Ingrese 'M' para meses o 'A' para años"
   monthly_payment_amount: 'Tu pago mensual es: '
   another_calculation: '¿Le gustaría hacer otro cálculo? (S o N)'
+  thank_you: 'Gracias, %{name}, por usar la calculadora de hipotecas'
+  goodbye: 'Adios'
   

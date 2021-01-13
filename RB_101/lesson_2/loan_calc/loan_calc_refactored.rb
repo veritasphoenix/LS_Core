@@ -66,7 +66,7 @@ def get_users_name
   if user_name.empty?
     puts prompt 'invalid_input_name'
   else
-    puts "#{prompt('hello')} #{user_name}"
+    puts format(prompt('hello'), name: user_name)
   end
   user_name
 end
@@ -178,8 +178,8 @@ loop do
   monthly_payment =
     calculate_monthly_payment(loan_amount, interest_rate,
                               loan_duration).round(2)
-
-  puts "#{prompt('monthly_payment_amount')} $#{monthly_payment}"
+  
+  puts format(prompt('monthly_payment_amount'), amount: monthly_payment)
 
   # Asks user if they would like to make another calculation.
   # if yes, the app loops back to beginning of logic loop.
@@ -202,9 +202,8 @@ end
 
 # Thanks the user and says goodbye
 def goodbye(user_name)
-  puts "Thank you, #{user_name}, for using the Mortgage Calculator!"
-  puts "Good bye!"
+  puts format(prompt('thank_you'), name: user_name)
+  puts prompt 'goodbye'
 end
-goodbye users_name
-
 clear_screen
+goodbye users_name
