@@ -32,7 +32,7 @@ end
 
 # Clear screen. Used before and after app runs
 def clear_screen
-  system 'clear'
+  system('clear') || system('cls')
 end
 clear_screen
 
