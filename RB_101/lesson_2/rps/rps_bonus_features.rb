@@ -1,4 +1,3 @@
-require 'pry'
 require 'yaml'
 MESSAGE = YAML.load_file('rps_prompts.yml')
 VALID_CHOICE = %w(rock paper scissors lizard spock)
