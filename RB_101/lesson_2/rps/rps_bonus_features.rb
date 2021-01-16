@@ -209,6 +209,7 @@ end
 def display_score(score_hash)
   puts prompt 'current_score'
   puts "Player: #{score_hash[:player]}   Computer: #{score_hash[:computer]}"
+  puts prompt('first_to_five').light_blue
   puts
 end
 
