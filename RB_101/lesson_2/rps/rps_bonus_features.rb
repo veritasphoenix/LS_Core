@@ -203,7 +203,7 @@ def update_score(score_hash, round_winner)
   when 'computer'
     score_hash[:computer] += 1
   end
-  score_hash 
+  score_hash
 end
 
 def display_score(score_hash)
@@ -264,7 +264,7 @@ loop do
     print_round_winner(current_round_winner, round)
 
     score_hash = update_score(score_hash, current_round_winner)
-    
+  
     display_score(score_hash)
 
     round = update_round(round)
@@ -275,7 +275,7 @@ loop do
 
   grand_winner = score_hash.key(POINTS_TO_WIN)
   grand_winner(grand_winner)
-  
+
   break unless play_again?
 end
 
