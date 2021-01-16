@@ -1,3 +1,4 @@
+require 'pry'
 require 'yaml'
 MESSAGE = YAML.load_file('rps_prompts.yml')
 VALID_CHOICE = %w(rock paper scissors lizard spock)
@@ -11,23 +12,46 @@ GAME_LOGIC = {
   spock: ['rock', 'scissors']
 }
 
+POINTS_TO_WIN = 5
+
+# I didn't write this class
+class String
+  # colorization
+  def colorize(color_code)
+    "\e[#{color_code}m#{self}\e[0m"
+  end
+
+  def red
+    colorize(31)
+  end
+
+  def green
+    colorize(32)
+  end
+
+  def yellow
+    colorize(33)
+  end
+
+  def blue
+    colorize(34)
+  end
+
+  def pink
+    colorize(35)
+  end
+
+  def light_blue
+    colorize(36)
+  end
+end
+
 def clear_screen
   system('clear') || system('cls')
 end
 
 def prompt(input)
-  puts "=> #{MESSAGE[input]}"
-end
-
-# Decide who wins
-def play(player_choice, computer_choice)
-  if GAME_LOGIC[player_choice.to_sym].include? computer_choice
-    prompt 'player_wins'
-  elsif GAME_LOGIC[computer_choice.to_sym].include? player_choice
-    prompt 'computer_wins'
-  else
-    prompt 'tie'
-  end
+  "=> #{MESSAGE[input]}"
 end
 
 # Convert player_choice from number to choice name
@@ -43,7 +67,7 @@ def convert_choice_to_string(player_choice)
   player_choice
 end
 
-def display_user_choices
+def display_player_choices
   player_prompt = <<-MSG
       Please make a choice (1-5):
       1) Rock
@@ -61,101 +85,158 @@ def get_player_choice
   choice = ''
 
   loop do
-    puts display_user_choices
+    puts display_player_choices
     choice = gets.chomp.strip
     choice = convert_choice_to_string(choice)
 
     break if VALID_CHOICE.include?(choice)
 
-    prompt 'invalid_choice'
-    puts ''
+    puts prompt('invalid_choice').red
+    puts
   end
 
   choice
 end
 
-def ready
-  puts '   ______    _______  _______  ______   __   __ '
-  puts '  |    _ |  |       ||   _   ||      | |  | |  |'
-  puts '  |   | ||  |    ___||  |_|  ||  _    ||  |_|  |'
-  puts '  |   |_||_ |   |___ |       || | |   ||       |'
-  puts '  |    __  ||    ___||       || |_|   ||_     _|'
-  puts '  |   |  | ||   |___ |   _   ||       |  |   |  '
-  puts '  |___|  |_||_______||__| |__||______|   |___|  '
+def print_ready
+  puts '   ______    _______  _______  ______   __   __ '.red
+  puts '  |    _ |  |       ||   _   ||      | |  | |  |'.red
+  puts '  |   | ||  |    ___||  |_|  ||  _    ||  |_|  |'.red
+  puts '  |   |_||_ |   |___ |       || | |   ||       |'.red
+  puts '  |    __  ||    ___||       || |_|   ||_     _|'.red
+  puts '  |   |  | ||   |___ |   _   ||       |  |   |  '.red
+  puts '  |___|  |_||_______||__| |__||______|   |___|  '.red
 end
 
-def one
-  puts ' _______  __    _  _______ '
-  puts '|       ||  |  | ||       |'
-  puts '|   _   ||   |_| ||    ___|'
-  puts '|  | |  ||       ||   |___ '
-  puts '|  |_|  ||  _    ||    ___|'
-  puts '|       || | |   ||   |___ '
-  puts '|_______||_|  |__||_______|'
+def print_one
+  puts ' _______  __    _  _______ '.yellow
+  puts '|       ||  |  | ||       |'.yellow
+  puts '|   _   ||   |_| ||    ___|'.yellow
+  puts '|  | |  ||       ||   |___ '.yellow
+  puts '|  |_|  ||  _    ||    ___|'.yellow
+  puts '|       || | |   ||   |___ '.yellow
+  puts '|_______||_|  |__||_______|'.yellow
 end
 
-def two
-  puts ' _______  _     _  _______ '
-  puts '|       || | _ | ||       |'
-  puts '|_     _|| || || ||   _   |'
-  puts '  |   |  |       ||  | |  |'
-  puts '  |   |  |       ||  |_|  |'
-  puts '  |   |  |   _   ||       |'
-  puts '  |___|  |__| |__||_______|'
+def print_two
+  puts ' _______  _     _  _______ '.yellow
+  puts '|       || | _ | ||       |'.yellow
+  puts '|_     _|| || || ||   _   |'.yellow
+  puts '  |   |  |       ||  | |  |'.yellow
+  puts '  |   |  |       ||  |_|  |'.yellow
+  puts '  |   |  |   _   ||       |'.yellow
+  puts '  |___|  |__| |__||_______|'.yellow
 end
 
-def three
-  puts ' _______  __   __  ______    _______  _______ '
-  puts '|       ||  | |  ||    _ |  |       ||       |'
-  puts '|_     _||  |_|  ||   | ||  |    ___||    ___|'
-  puts '  |   |  |       ||   |_||_ |   |___ |   |___ '
-  puts '  |   |  |       ||    __  ||    ___||    ___|'
-  puts '  |   |  |   _   ||   |  | ||   |___ |   |___ '
-  puts '  |___|  |__| |__||___|  |_||_______||_______|'
+def print_three
+  puts ' _______  __   __  ______    _______  _______ '.yellow
+  puts '|       ||  | |  ||    _ |  |       ||       |'.yellow
+  puts '|_     _||  |_|  ||   | ||  |    ___||    ___|'.yellow
+  puts '  |   |  |       ||   |_||_ |   |___ |   |___ '.yellow
+  puts '  |   |  |       ||    __  ||    ___||    ___|'.yellow
+  puts '  |   |  |   _   ||   |  | ||   |___ |   |___ '.yellow
+  puts '  |___|  |__| |__||___|  |_||_______||_______|'.yellow
 end
 
-def go
-  puts ' _______  _______  __ '
-  puts '|       ||       ||  |'
-  puts '|    ___||   _   ||  |'
-  puts '|   | __ |  | |  ||  |'
-  puts '|   ||  ||  |_|  ||__|'
-  puts '|   |_| ||       | __ '
-  puts '|_______||_______||__|'
+def print_go
+  puts ' _______  _______  __ '.green
+  puts '|       ||       ||  |'.green
+  puts '|    ___||   _   ||  |'.green
+  puts '|   | __ |  | |  ||  |'.green
+  puts '|   ||  ||  |_|  ||__|'.green
+  puts '|   |_| ||       | __ '.green
+  puts '|_______||_______||__|'.green
 end
 
 def lead_up
   clear_screen
-  ready
+  print_ready
   system("sleep 1")
   clear_screen
-  one
+  print_one
   system("sleep 0.5")
   clear_screen
-  two
+  print_two
   system("sleep 0.5")
   clear_screen
-  three
+  print_three
   system("sleep 0.5")
   clear_screen
-  go
+  print_go
   system("sleep 1")
   clear_screen
+end
+
+def print_round_choices(player, computer)
+  puts "=> You chose: #{player.light_blue} and the almighty overlord chose: #{computer.red}"
+  puts
+end
+
+def round_winner(player_choice, computer_choice)
+  winner = ''
+
+  if GAME_LOGIC[player_choice.to_sym].include? computer_choice
+    winner = 'player'
+  elsif GAME_LOGIC[computer_choice.to_sym].include? player_choice
+    winner = 'computer'
+  end
+
+  winner
+end
+
+def print_round_winner(round_winner, round_number)
+  case round_winner
+  when 'player'
+    puts format(prompt('player_wins'), round: round_number)
+    puts
+  when 'computer'
+    puts format(prompt('computer_wins'), round: round_number)
+    puts
+  else
+    puts format(prompt('tie'), round: round_number)
+  end
+end
+
+def update_score(score_hash, round_winner)
+  case round_winner
+  when 'player'
+    score_hash[:player] += 1
+  when 'computer'
+    score_hash[:computer] += 1
+  end
+  score_hash 
+end
+
+def display_score(score_hash)
+  puts prompt 'current_score'
+  puts "Player: #{score_hash[:player]}   Computer: #{score_hash[:computer]}"
+  puts
+end
+
+def update_round(round)
+  round += 1
+  round
+end
+
+def grand_winner(winner)
+  puts prompt('player_grand_winner').light_blue if winner == :player
+  puts prompt('computer_grand_winner').red if winner == :computer
 end
 
 def play_again?
   response = ''
 
   loop do
-    prompt 'play_again'
+    puts prompt('play_again').green
     response = gets.chomp.downcase.strip
 
-    if response.start_with? 'y'
-      break
-    elsif response.start_with? 'n'
+    case response
+    when 'y'
+      break response = true
+    when 'n'
       break response = false
     else
-      prompt 'invalid_input'
+      puts prompt('invalid_input').red
     end
   end
 
@@ -166,20 +247,37 @@ end
 loop do
   clear_screen
 
-  prompt 'welcome'
+  score_hash = { player: 0, computer: 0 }
+  round = 1
+  puts prompt('welcome').green
 
-  player = get_player_choice
-  computer = VALID_CHOICE.sample
+  loop do
+    player = get_player_choice
+    computer = VALID_CHOICE.sample
 
-  lead_up
+    lead_up
 
-  puts "=> You chose #{player}, " \
-       "and your master...er...the computer chose #{computer}."
+    print_round_choices(player, computer)
 
-  play player, computer
+    current_round_winner = round_winner(player, computer)
 
+    print_round_winner(current_round_winner, round)
+
+    score_hash = update_score(score_hash, current_round_winner)
+    
+    display_score(score_hash)
+
+    round = update_round(round)
+
+    break if score_hash[:player] == POINTS_TO_WIN ||
+             score_hash[:computer] == POINTS_TO_WIN
+  end
+
+  grand_winner = score_hash.key(POINTS_TO_WIN)
+  grand_winner(grand_winner)
+  
   break unless play_again?
 end
 
 clear_screen
-prompt 'thanks'
+puts prompt('thanks').green

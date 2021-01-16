@@ -1,8 +1,11 @@
 welcome: 'Welcome, squishy human, to Rock, Paper, Scissors, Lizard, Spock'
 invalid_choice: 'Invalid Choice. Please choose 1-5.'
 invalid_input: 'Invalid input. Please enter either Y or N.'
-player_wins: "Darn you, mortal...you win! This isn't the last you've seen of me."
-computer_wins: 'Silly mortal, I won! Did you think you could beat me?!?! Muahahaha'
-tie: "It's a tie...but you are still mortal."
+current_score: 'The current score is:'
+player_wins: "Darn you, mortal...you win round %{round}! This isn't the last you've seen of me."
+player_grand_winner: 'You got lucky and beat me. You are the Grand Winner'
+computer_wins: 'Silly mortal, I win round %{round}! Did you think you could beat me?!?! Muahahaha'
+computer_grand_winner: 'I am the Grand Winner! You will never beat me!'
+tie: "Round %{round} is a tie...but you are still mortal."
 play_again: 'Would you like to play again? Y or N'
 thanks: 'Thanks for playing Rock, Paper, Scissors, Lizard, Spock'
