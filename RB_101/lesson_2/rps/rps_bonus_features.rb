@@ -147,6 +147,7 @@ def print_go
   puts '|_______||_______||__|'.green
 end
 
+# rubocop:disable Metrics/MethodLength
 def lead_up
   clear_screen
   print_ready
@@ -165,7 +166,9 @@ def lead_up
   system("sleep 1")
   clear_screen
 end
+# rubocop:enable Metrics/MethodLength
 
+# rubocop:disable Layout/LineLength
 def print_round_choices(player, computer)
   puts "=> You chose: #{player.light_blue} and the almighty overlord chose: #{computer.red}"
   puts
@@ -195,6 +198,7 @@ def print_round_winner(round_winner, round_number)
     puts format(prompt('tie'), round: round_number)
   end
 end
+# rubocop: enable Layout/LineLength
 
 def update_score(score_hash, round_winner)
   case round_winner
@@ -264,7 +268,7 @@ loop do
     print_round_winner(current_round_winner, round)
 
     score_hash = update_score(score_hash, current_round_winner)
-  
+
     display_score(score_hash)
 
     round = update_round(round)
