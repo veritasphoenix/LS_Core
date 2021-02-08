@@ -1,3 +1,6 @@
+require 'pry'
+require 'pry-byebug'
+
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -16,7 +19,8 @@ end
 def first_player_choices
   system_clear
   <<-MSG
-    Please choose who goes first (1-3):
+    Welcome to tic tac toe!
+    Please choose who goes first (Please choose 1, 2, or 3):
       1) Player
       2) Computer
       3) Random Choice
@@ -31,10 +35,11 @@ def first_player
     choice = gets.chomp
 
     if ['1', '2', '3'].include?(choice)
-      ['Player', 'Computer'].sample if choice == '3'
+      choice = ['1', '2'].sample if choice == '3'
       break choices[choice]
     else
-      prompt 'Invalid choice. Please choose either 1, 2, or 3.'
+      prompt 'Invalid choice.'
+      sleep(2)
     end
   end
 end
@@ -43,7 +48,9 @@ end
 def display_board(brd, tally)
   system_clear
   prompt "You're the #{PLAYER_MARKER}. Computer is the #{COMPUTER_MARKER}."
+  puts
   prompt "First to win 5 games is is crowned the Grand Champion"
+  puts
   prompt "The score is Player:#{tally['Player']}  Computer:#{tally['Computer']}"
   puts ""
   puts "     |     |"
@@ -103,7 +110,7 @@ end
 def player_places_piece!(brd)
   square = ''
   loop do
-    prompt "Please choose a space to place your 'X':" \
+    prompt "Please choose a space to place your 'X': " \
            "(#{joiner(empty_squares(brd))})"
     square = gets.chomp.to_i
     break if empty_squares(brd).include?(square)
@@ -198,25 +205,30 @@ def play_again?
     prompt "Play again? (y or n)"
     answer = gets.chomp.downcase
 
-    return true if ['y', 'yes'].include?(answer)
-    prompt 'Invalid input. Please enter either "y" or "n".'
+    if ['y', 'yes'].include?(answer)
+      return true
+    elsif ['n', 'no'].include?(answer)
+      return false
+    else
+      prompt 'Invalid input. Please enter either "y" or "n".'
+    end
   end
   false
 end
 
 # ------------------- Gameplay ----------------------- #
-
 loop do
   system_clear
   wins_tally = initialize_wins_tally
+  current_player = first_player
 
   loop do
+    # binding.pry
+
     board = initialize_board
-    current_player = first_player
 
     loop do
       display_board(board, wins_tally)
-
       place_piece!(board, current_player)
       current_player = alternate_player(current_player)
       break if someone_won?(board) || board_full?(board)
@@ -229,6 +241,7 @@ loop do
       prompt "#{detect_grand_champion(wins_tally)} is the Grand Champion!"
     elsif someone_won?(board)
       prompt "#{detect_winner(board)} won this round!"
+      prompt "Loser goes first next round."
     else
       prompt "It's a tie!"
     end
@@ -236,7 +249,9 @@ loop do
 
     break if someone_grand_champion?(wins_tally)
   end
-  break unless play_again?
+  break if !play_again?
 end
 
 prompt "Thanks for playing tic tac toe"
+sleep(2)
+system_clear
