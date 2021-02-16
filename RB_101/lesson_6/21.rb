@@ -96,7 +96,7 @@ end
 
 def calculate_hand_value(hand)
   hand_value = hand.map do |card|
-    if FACE_CARD_VALUES.has_key?(card)
+    if FACE_CARD_VALUES.key?(card)
       FACE_CARD_VALUES[card]
     else
       card
@@ -132,6 +132,7 @@ def busted?(hand_total)
   hand_total > 21
 end
 
+# rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 def determine_winner(player_total, dealer_total)
   if (player_total > dealer_total || dealer_total > 21) && player_total <= 21
     'player'
@@ -141,6 +142,7 @@ def determine_winner(player_total, dealer_total)
     'tie'
   end
 end
+# rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
 def display_winner(winner)
   case winner
@@ -175,7 +177,7 @@ loop do
   puts "Shuffling..."
   sleep(2)
   system_clear
-  
+
   game_deck = create_deck
   player_card_values = card_values(deal_first_2_cards(game_deck))
   dealer_card_values = card_values(deal_first_2_cards(game_deck))
@@ -194,30 +196,30 @@ loop do
 
     # player loop
     loop do
-        puts "Your hand currently totals #{player_total}."
-        puts "Would you like to hit or stay? Please enter an 'h' or 's'"
-        response = gets.chomp.downcase
-          
-        if %w(h hit).include?(response)
-          system_clear
-          player_card_values << deal_card(game_deck).first
-          player_total = calculate_hand_value(player_card_values)
+      puts "Your hand currently totals #{player_total}."
+      puts "Would you like to hit or stay? Please enter an 'h' or 's'"
+      response = gets.chomp.downcase
 
-          display_hands(player_card_values, dealer_card_values)
+      if %w(h hit).include?(response)
+        system_clear
+        player_card_values << deal_card(game_deck).first
+        player_total = calculate_hand_value(player_card_values)
 
-          if busted?(player_total)
-            puts "Sorry, your hand totals #{player_total}, you busted!"
-            sleep(2)
-            break
-          end
-        elsif %w(s stay).include?(response)
-          puts "Player stays. Dealer's turn."
+        display_hands(player_card_values, dealer_card_values)
+
+        if busted?(player_total)
+          puts "Sorry, your hand totals #{player_total}, you busted!"
           sleep(2)
-          system_clear
           break
-        else
-          puts "Invalid response."
         end
+      elsif %w(s stay).include?(response)
+        puts "Player stays. Dealer's turn."
+        sleep(2)
+        system_clear
+        break
+      else
+        puts "Invalid response."
+      end
     end
 
     break if busted?(player_total)
