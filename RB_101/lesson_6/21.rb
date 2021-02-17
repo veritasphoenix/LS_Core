@@ -1,10 +1,28 @@
+require 'io/console'
+
 NAMES = { 'J' => 'Jack', 'Q' => 'Queen', 'K' => 'King', 'A' => 'Ace' }
 SUITS = { 'H' => 'Hearts', 'D' => 'Diamonds', 'C' => 'Clubs', 'S' => 'Spades' }
 FACE_CARD_VALUES = { 'J' => 10, 'Q' => 10, 'K' => 10 }
 DEALER_MINIMUM = 17
+MAX_TOTAL = 21
 
 def system_clear
   system('cls') || system('clear')
+end
+
+def press_to_continue
+  puts "Press any key to continue..."
+  STDIN.getch
+  puts "            \r"
+end
+
+def welcome
+  puts "Welcome to 21"
+  puts "Rules:"
+  puts "You will go first."
+  puts "Try to get as close to 21 without going over."
+  puts "First to win 5 games is the Grand Champion."
+  puts 'Good Luck.'
 end
 
 def create_deck
@@ -113,7 +131,7 @@ end
 
 def calculate_ace_value(hand)
   total = hand.select { |card| card.to_s.to_i == card }.sum
-  if total + 11 <= 21
+  if total + 11 <= MAX_TOTAL
     11
   else
     1
@@ -125,18 +143,20 @@ def dealer_stay?(hand_total)
 end
 
 def twenty_one?(total)
-  total == 21
+  total == MAX_TOTAL
 end
 
 def busted?(hand_total)
-  hand_total > 21
+  hand_total > MAX_TOTAL
 end
 
 # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 def determine_winner(player_total, dealer_total)
-  if (player_total > dealer_total || dealer_total > 21) && player_total <= 21
+  if (player_total > dealer_total || dealer_total > MAX_TOTAL) &&
+     player_total <= MAX_TOTAL
     'player'
-  elsif (dealer_total > player_total || player_total > 21) && dealer_total <= 21
+  elsif (dealer_total > player_total || player_total > MAX_TOTAL) &&
+        dealer_total <= MAX_TOTAL
     'dealer'
   elsif player_total == dealer_total
     'tie'
@@ -144,12 +164,36 @@ def determine_winner(player_total, dealer_total)
 end
 # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
+def round_winner_scoring(player_total, dealer_total, score_hash)
+  round_winner = determine_winner(player_total, dealer_total)
+  score_hash[round_winner] += 1 unless round_winner == 'tie'
+end
+
 def display_winner(winner)
   case winner
   when 'tie' then puts "It's a tie!"
   when 'player' then puts "You win!"
   when 'dealer' then puts "Dealer is the winner!"
   end
+end
+
+def display_score(score_hash)
+  puts
+  puts "The current score is:"
+  puts "Player: #{score_hash['player']}"
+  puts "Dealer: #{score_hash['dealer']}"
+end
+
+def display_round_results(player_cards, player_total, dealer_cards, dealer_total, score_hash)
+  display_final_hands(player_cards, dealer_cards)
+  round_winner = determine_winner(player_total, dealer_total)
+  display_winner(round_winner)
+  display_score(score_hash)
+  press_to_continue
+end
+
+def grand_winner?(score_hash)
+  score_hash['player'] == 5 || score_hash['dealer'] == 5
 end
 
 def play_again?
@@ -167,84 +211,94 @@ end
 # ----------------------------- MAIN LOOP ---------------------------------
 
 system_clear
-puts 'Welcome to 21'
-puts 'You will go first. Try to get as close to 21 without going over.'
-puts 'Good Luck.'
+welcome
 sleep(3)
 
 loop do
-  system_clear
-  puts "Shuffling..."
-  sleep(2)
-  system_clear
+  score = { 'player' => 0, 'dealer' => 0 }
 
-  game_deck = create_deck
-  player_card_values = card_values(deal_first_2_cards(game_deck))
-  dealer_card_values = card_values(deal_first_2_cards(game_deck))
-  # if you want the card suits too, deal into separate deck variable,
-  # then get values
-  player_total = calculate_hand_value(player_card_values)
-  dealer_total = calculate_hand_value(dealer_card_values)
-  display_hands(player_card_values, dealer_card_values)
-
-  # game loop
   loop do
-    if twenty_one?(player_total)
-      puts "Player was dealt blackjack! Player wins."
+    system_clear
+    puts "Shuffling..."
+    sleep(2)
+    system_clear
+
+    game_deck = create_deck
+    player_card_values = card_values(deal_first_2_cards(game_deck))
+    dealer_card_values = card_values(deal_first_2_cards(game_deck))
+    player_total = calculate_hand_value(player_card_values)
+    dealer_total = calculate_hand_value(dealer_card_values)
+    display_hands(player_card_values, dealer_card_values)
+
+    # game loop
+    loop do
+      if twenty_one?(player_total)
+        puts "Player was dealt blackjack! Player wins."
+        puts
+        round_winner_scoring(player_total, dealer_total, score)
+        display_round_results(player_card_values, player_total, dealer_card_values, dealer_total, score)
+        break
+      end
+
+      # player loop
+      loop do
+        puts "Your hand currently totals #{player_total}."
+        puts "Would you like to hit or stay? Please enter an 'h' or 's'"
+        response = gets.chomp.downcase
+
+        if %w(h hit).include?(response)
+          system_clear
+          player_card_values << deal_card(game_deck).first
+          player_total = calculate_hand_value(player_card_values)
+
+          display_hands(player_card_values, dealer_card_values)
+
+          if busted?(player_total)
+            puts "Sorry, your hand totals #{player_total}, you busted!"
+            puts
+            round_winner_scoring(player_total, dealer_total, score)
+            display_round_results(player_card_values, player_total, dealer_card_values, dealer_total, score)
+            sleep(2)
+            break
+          end
+        elsif %w(s stay).include?(response)
+          puts "Player stays. Dealer's turn."
+          sleep(2)
+          system_clear
+          break
+        else
+          puts "Invalid response."
+        end
+      end
+
+      break if busted?(player_total)
+
+      # dealer loop
+      loop do
+        if busted?(dealer_total)
+          puts "Dealer has #{dealer_total}. Dealer busted!"
+          break
+        elsif dealer_stay?(dealer_total)
+          puts "Dealer stays at #{dealer_total}."
+          break
+        else
+          dealer_card_values << deal_card(game_deck).first
+          dealer_total = calculate_hand_value(dealer_card_values)
+        end
+      end
+
+      system_clear
+      round_winner_scoring(player_total, dealer_total, score)
+      display_round_results(player_card_values, player_total, dealer_card_values, dealer_total, score)
       break
     end
 
-    # player loop
-    loop do
-      puts "Your hand currently totals #{player_total}."
-      puts "Would you like to hit or stay? Please enter an 'h' or 's'"
-      response = gets.chomp.downcase
-
-      if %w(h hit).include?(response)
-        system_clear
-        player_card_values << deal_card(game_deck).first
-        player_total = calculate_hand_value(player_card_values)
-
-        display_hands(player_card_values, dealer_card_values)
-
-        if busted?(player_total)
-          puts "Sorry, your hand totals #{player_total}, you busted!"
-          sleep(2)
-          break
-        end
-      elsif %w(s stay).include?(response)
-        puts "Player stays. Dealer's turn."
-        sleep(2)
-        system_clear
-        break
-      else
-        puts "Invalid response."
-      end
+    if grand_winner?(score)
+      grand_winner = score.key(5)
+      puts "#{grand_winner.capitalize} is the Grand Winner!"
+      break
     end
-
-    break if busted?(player_total)
-
-    # dealer loop
-    loop do
-      if busted?(dealer_total)
-        puts "Dealer has #{dealer_total}. Dealer busted!"
-        break
-      elsif dealer_stay?(dealer_total)
-        puts "Dealer stays at #{dealer_total}."
-        break
-      else
-        dealer_card_values << deal_card(game_deck).first
-        dealer_total = calculate_hand_value(dealer_card_values)
-      end
-    end
-
-    # display results
-    system_clear
-    display_final_hands(player_card_values, dealer_card_values)
-    display_winner(determine_winner(player_total, dealer_total))
-    break
   end
-
   break unless play_again?
 end
 
