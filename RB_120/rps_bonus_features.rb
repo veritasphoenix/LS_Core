@@ -20,10 +20,6 @@ class Move
   def >(other_move)
     beats.include? other_move.value
   end
-
-  def <(other_move)
-    other_move.beats.include? @value
-  end
 end
 
 class Rock < Move
@@ -97,6 +93,7 @@ class Human < Player
       choice = gets.chomp.strip
       break if Move::VALID_CHOICE.include? choice
       puts "Sorry, invalid choice."
+      sleep(2)
     end
     self.move = convert_choice_to_class(choice)
     RPSGame.record_move_history(name, move.value)
@@ -132,6 +129,7 @@ class Human < Player
 end
 
 class Computer < Player
+
   def set_name
     self.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5'].sample
   end
@@ -164,66 +162,7 @@ class RPSGame
     @computer = Computer.new
     @score = { human: 0, computer: 0, round: 1 }
     @@move_history = { human.name => [], computer.name => [] }
-  end
-
-  # Methods are arranged alphabetically
-  def display_goodbye_message
-    clear_screen
-    puts "Thanks, #{human.name}, for playing " \
-    "Rock, Paper, Scissors, lizard, spock. Goodbye!"
-  end
-
-  def display_grand_winner
-    blank_line
-    grand_winner = @score.key(3)
-    if grand_winner == :human
-      puts "#{human.name} is the grand winner!"
-    else
-      puts "#{computer.name} is the grand winner!"
-    end
-    wait_for_enter
-  end
-
-  def display_moves
-    clear_screen
-    blank_line
-    puts "#{human.name} chose #{human.move.value}."
-    puts "#{computer.name} chose #{computer.move.value}."
-    blank_line
-  end
-
-  def display_move_history
-    puts "#{human.name}'s move history:"
-    @@move_history[human.name].each { |n| puts n }
-    puts "#{computer.name}'s move history:"
-    @@move_history[computer.name].each { |n| puts n }
-    wait_for_enter
-  end
-
-  def display_round_winner(winner)
-    if winner
-      puts "#{winner} won round #{@score[:round]}!"
-    else
-      puts "It's a tie!"
-    end
-
-    @score[:round] += 1
-  end
-
-  def display_score
-    blank_line
-    dashed_line
-    puts "#{human.name}: #{@score[:human]}"
-    puts "#{computer.name}: #{@score[:computer]}"
-    dashed_line
-    blank_line
-  end
-
-  def display_welcome_message
-    clear_screen
-    blank_line
-    puts "#{human.name}, Welcome to Rock, Paper, Scissors, Lizard, Spock!"
-    sleep(3)
+    @quit = nil
   end
 
   def play
@@ -232,6 +171,7 @@ class RPSGame
       until grand_winner?
         play_round
       end
+      break if @quit == 'q' || @quit == 'quit'
       display_grand_winner
       @score = { human: 0, computer: 0, round: 1 }
       break unless play_again?
@@ -239,18 +179,97 @@ class RPSGame
     display_goodbye_message
   end
 
+  private
+
+  def determine_round_winner
+    if human.move > computer.move
+      @score[:human] += 1
+      display_round_winner(human.name)
+    elsif computer.move > human.move
+      @score[:computer] += 1
+      display_round_winner(computer.name)
+    else
+      display_round_winner(nil)
+    end
+  end
+
+    # Methods are arranged alphabetically
+    def display_goodbye_message
+      clear_screen
+      puts "Thanks, #{human.name}, for playing " \
+      "Rock, Paper, Scissors, lizard, spock. Goodbye!"
+    end
+  
+    def display_grand_winner
+      blank_line
+      grand_winner = @score.key(3)
+      if grand_winner == :human
+        puts "#{human.name} is the grand winner!"
+      else
+        puts "#{computer.name} is the grand winner!"
+      end
+    end
+  
+    def display_moves
+      clear_screen
+      blank_line
+      puts "#{human.name} chose #{human.move.value}."
+      puts "#{computer.name} chose #{computer.move.value}."
+      blank_line
+    end
+  
+    def display_move_history
+      puts "#{human.name}'s move history:"
+      @@move_history[human.name].each { |n| puts n }
+      puts "#{computer.name}'s move history:"
+      @@move_history[computer.name].each { |n| puts n }
+      wait_for_response
+    end
+  
+    def display_round_winner(winner)
+      if winner
+        puts "#{winner} won round #{@score[:round]}!"
+      else
+        puts "It's a tie!"
+      end
+  
+      @score[:round] += 1
+    end
+  
+    def display_score
+      blank_line
+      dashed_line
+      puts "#{human.name}: #{@score[:human]}"
+      puts "#{computer.name}: #{@score[:computer]}"
+      dashed_line
+      blank_line
+    end
+  
+    def display_welcome_message
+      clear_screen
+      blank_line
+      puts "#{human.name}, Welcome to Rock, Paper, Scissors, Lizard, Spock!"
+      sleep(3)
+    end
+
+  def grand_winner?
+    return true if @quit == 'q' || @quit == 'quit'
+    @@move_history = { human.name => [], computer.name => [] }
+    @score.values[0..1].include? 3
+  end
+
   def play_again?
     dashed_line
     blank_line
     answer = nil
     loop do
-      puts "#{human.name}, Would you like to play again? (y/n)"
+      puts "#{human.name}, Would you like to play again? (y)es or (n)o"
       answer = gets.chomp.downcase
-      break if %w(y n).include? answer
-      puts "Sorry, answer must be 'y' or 'n'."
+      break if %w(y n yes no).include? answer
+      puts "Sorry, answer must be (y)es or (n)o."
     end
 
-    answer == 'y'
+    answer == 'y' || answer == 'yes'
   end
 
   def play_round
@@ -266,28 +285,11 @@ class RPSGame
     @@move_history[name] << value
   end
 
-  def wait_for_enter
+  def wait_for_response
     blank_line
-    puts "When you're ready to continue, press ENTER"
-    gets
-  end
-
-  private
-
-  def determine_round_winner
-    if human.move > computer.move
-      @score[:human] += 1
-      display_round_winner(human.name)
-    elsif human.move < computer.move
-      @score[:computer] += 1
-      display_round_winner(computer.name)
-    else
-      display_round_winner(nil)
-    end
-  end
-
-  def grand_winner?
-    @score.values[0..1].include? 3
+    puts "When you're ready to continue, press ENTER. Or type (q)uit to quit "
+    answer = gets.chomp.downcase
+    @quit = 'q' if answer == 'q' || answer == 'quit'
   end
 end
 
