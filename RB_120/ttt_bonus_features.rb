@@ -38,7 +38,7 @@ class Board # methods in alphabetical order
 
   def at_risk_square?(marker)
     WINNING_LINES.each do |line|
-      squares = @squares.values_at *line
+      squares = @squares.values_at(*line)
       marked = squares.select(&:marked?).collect(&:marker)
       if marked.size == 2 && marked.count(marker) == 2
         return true
@@ -49,7 +49,7 @@ class Board # methods in alphabetical order
 
   def find_at_risk_square(marker)
     WINNING_LINES.each do |line|
-      squares = @squares.values_at *line
+      squares = @squares.values_at(*line)
       marked = squares.select(&:marked?).collect(&:marker)
       if marked.size == 2 && marked.count(marker == 2)
         risk_square = squares.select(&:unmarked?).first
@@ -81,7 +81,7 @@ class Board # methods in alphabetical order
 
   def winning_marker
     WINNING_LINES.each do |line|
-      squares = @squares.values_at *line
+      squares = @squares.values_at(*line)
       if three_identical_markers? squares
         return squares.first.marker
       end
@@ -107,7 +107,7 @@ class Square
     @marker = marker
   end
 
- # ----------methods - in alphabetical order---------- #
+  # ----------methods - in alphabetical order---------- #
 
   def marked?
     marker != INITIAL_MARKER
