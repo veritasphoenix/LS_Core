@@ -30,30 +30,21 @@ class Board # methods in alphabetical order
   # rubocop:enable Metrics/AbcSize
   # rubocop:enable Metrics/MethodLength
 
+  # ----------in alphabetical order---------- #
+
   def []=(num, marker)
     squares[num].marker = marker
   end
 
-  def unmarked_keys
-    @squares.select { |_, sq| sq.unmarked? }.keys
-  end
-
-  def full?
-    unmarked_keys.empty?
-  end
-
-  def someone_won?
-    !!winning_marker
-  end
-
-  def winning_marker
+  def at_risk_square?(marker)
     WINNING_LINES.each do |line|
       squares = @squares.values_at *line
-      if three_identical_markers? squares
-        return squares.first.marker
+      marked = squares.select(&:marked?).collect(&:marker)
+      if marked.size == 2 && marked.count(marker) == 2
+        return true
       end
     end
-    nil
+    false
   end
 
   def find_at_risk_square(marker)
@@ -68,23 +59,34 @@ class Board # methods in alphabetical order
     nil
   end
 
-  def at_risk_square?(marker)
-    WINNING_LINES.each do |line|
-      squares = @squares.values_at *line
-      marked = squares.select(&:marked?).collect(&:marker)
-      if marked.size == 2 && marked.count(marker) == 2
-        return true
-      end
-    end
-    false
+  def full?
+    unmarked_keys.empty?
+  end
+
+  def reset
+    (1..9).each { |key| @squares[key] = Square.new }
+  end
+
+  def someone_won?
+    !!winning_marker
   end
 
   def square_five_empty?
     unmarked_keys.include? 5
   end
 
-  def reset
-    (1..9).each { |key| @squares[key] = Square.new }
+  def unmarked_keys
+    @squares.select { |_, sq| sq.unmarked? }.keys
+  end
+
+  def winning_marker
+    WINNING_LINES.each do |line|
+      squares = @squares.values_at *line
+      if three_identical_markers? squares
+        return squares.first.marker
+      end
+    end
+    nil
   end
 
   private
@@ -105,12 +107,14 @@ class Square
     @marker = marker
   end
 
-  def to_s
-    @marker
-  end
+ # ----------methods - in alphabetical order---------- #
 
   def marked?
     marker != INITIAL_MARKER
+  end
+
+  def to_s
+    @marker
   end
 
   def unmarked?
@@ -129,8 +133,14 @@ end
 class Score
   @@score = { human: 0, computer: 0 }
 
+  # ----------methods - in alphabetical order---------- #
+
   def self.add_point(player)
     @@score[player] += 1
+  end
+
+  def self.reset
+    @@score = { human: 0, computer: 0 }
   end
 
   def self.get(player)
@@ -139,10 +149,6 @@ class Score
 
   def self.total
     @@score
-  end
-
-  def self.reset
-    @@score = { human: 0, computer: 0 }
   end
 end
 
@@ -172,6 +178,7 @@ class TTTGame
   private
 
   # method order: gameplay -> display -> utility
+  # ----------gameplay methods - in alphabetical order---------- #
 
   def computer_moves
     square = if board.at_risk_square?(COMPUTER_MARKER)
