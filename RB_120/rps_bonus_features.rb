@@ -1,296 +1,226 @@
-module DisplayAdditions
-  def clear_screen
-    system('clear') || system('cls')
-  end
-
-  def dashed_line
-    puts "---------------------------------------"
-  end
-
-  def blank_line
-    puts
-  end
-end
-
-class Move
-  VALID_CHOICE = %w(1 2 3 4 5)
-
-  attr_reader :value, :beats
-
-  def >(other_move)
-    beats.include? other_move.value
-  end
-end
-
-class Rock < Move
-  def initialize
-    super
-    @value = 'rock'
-    @beats = ['lizard', 'scissors']
-  end
-end
-
-class Paper < Move
-  def initialize
-    super
-    @value = 'paper'
-    @beats = ['spock', 'rock']
-  end
-end
-
-class Scissors < Move
-  def initialize
-    super
-    @value = 'scissors'
-    @beats = ['paper', 'lizard']
-  end
-end
-
-class Lizard < Move
-  def initialize
-    super
-    @value = 'lizard'
-    @beats = ['spock', 'paper']
-  end
-end
-
-class Spock < Move
-  def initialize
-    super
-    @value = 'spock'
-    @beats = ['rock', 'scissors']
-  end
-end
-
-class Player
-  attr_accessor :move, :name
+class Board
+  WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
+                  [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # cols
+                  [[1, 5, 9], [3, 5, 7]]              # diagonals
 
   def initialize
-    set_name
+    @squares = {}
+    reset
+  end
+
+  def []=(num, marker)
+    @squares[num].marker = marker
+  end
+
+  def unmarked_keys
+    @squares.keys.select {|key| @squares[key].unmarked? }
+  end
+
+  def full?
+    unmarked_keys.empty?
+  end
+
+  def someone_won?
+    !!winning_marker
+  end
+
+  def winning_marker
+    WINNING_LINES.each do |line|
+      squares = @squares.values_at(*line)
+      if three_identical_markers?(squares)
+        return squares.first.marker
+      end
+    end
+    nil
+  end
+
+  def reset
+    (1..9).each {|key| @squares[key] = Square.new}
+  end
+
+  def draw
+    puts "     |     |"
+    puts "  #{@squares[1]}  |  #{@squares[2]}  |  #{@squares[3]}"
+    puts "     |     |"
+    puts "-----+-----+-----"
+    puts "     |     |"
+    puts "  #{@squares[4]}  |  #{@squares[5]}  |  #{@squares[6]}"
+    puts "     |     |"
+    puts "-----+-----+-----"
+    puts "     |     |"
+    puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
+    puts "     |     |"
   end
 
   private
 
-  def convert_choice_to_class(choice)
-    case choice
-    when '1' then Rock.new
-    when '2' then Paper.new
-    when '3' then Scissors.new
-    when '4' then Lizard.new
-    when '5' then Spock.new
-    end
+  def three_identical_markers?(squares)
+    markers = squares.select(&:marked?).collect(&:marker)
+    return false if markers.size != 3
+    markers.min == markers.max
+  end
+
+end
+
+class Square
+  INITIAL_MARKER = " "
+
+  attr_accessor :marker
+
+  def initialize(marker=INITIAL_MARKER)
+    @marker = marker
+  end
+
+  def to_s
+    @marker
+  end
+
+  def unmarked?
+    marker == INITIAL_MARKER
+  end
+
+  def marked?
+    marker != INITIAL_MARKER
   end
 end
 
-class Human < Player
-  include DisplayAdditions
+class Player
+  attr_reader :marker
 
-  def choose
-    choice = nil
-
-    loop do
-      puts display_player_choices
-      choice = gets.chomp.strip
-      break if Move::VALID_CHOICE.include? choice
-      puts "Sorry, invalid choice."
-      sleep(2)
-    end
-    self.move = convert_choice_to_class(choice)
-    RPSGame.record_move_history(name, move.value)
-    blank_line
-  end
-
-  def display_player_choices
-    clear_screen
-    blank_line
-
-    <<-MSG
-      Please make a choice (1-5):
-      1) Rock
-      2) Paper
-      3) Scissors
-      4) Lizard
-      5) Spock
-    MSG
-  end
-
-  def set_name
-    n = ""
-    loop do
-      clear_screen
-      puts "Hello, What's your name?"
-      n = gets.chomp
-      break unless n.empty?
-      puts "Sorry, you must enter a name."
-      sleep(2)
-    end
-    self.name = n
+  def initialize(marker)
+    @marker = marker
   end
 end
 
-class Computer < Player
+class TTTGame
+  HUMAN_MARKER = "X"
+  COMPUTER_MARKER = "O"
+  FIRST_TO_MOVE = HUMAN_MARKER
 
-  def set_name
-    self.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5'].sample
-  end
-
-  def moves
-    case name
-    when 'R2D2'     then '1'
-    when 'Hal'      then ['3', '3', '3', '1'].sample
-    when 'Chappie'  then ['1', '1', '1', '3'].sample
-    when 'Sonny'    then ['2', '2', '4', '4'].sample
-    when 'Number 5' then '5'
-    end
-  end
-
-  def choose
-    choice = moves
-    p choice
-    self.move = convert_choice_to_class(choice)
-    RPSGame.record_move_history(name, move.value)
-  end
-end
-
-class RPSGame
-  include DisplayAdditions
-
-  attr_accessor :human, :computer
+  attr_reader :board, :human, :computer
 
   def initialize
-    @human = Human.new
-    @computer = Computer.new
-    @score = { human: 0, computer: 0, round: 1 }
-    @@move_history = { human.name => [], computer.name => [] }
-    @quit = nil
+    @board = Board.new
+    @human = Player.new(HUMAN_MARKER)
+    @computer = Player.new(COMPUTER_MARKER)
+    @current_marker = FIRST_TO_MOVE
   end
 
   def play
+    clear
     display_welcome_message
+
     loop do
-      until grand_winner?
-        play_round
+      display_board
+
+      loop do
+        current_player_moves
+        break if board.someone_won? || board.full?
+        clear_screen_and_display_board if human_turn?
       end
-      break if @quit == 'q' || @quit == 'quit'
-      display_grand_winner
-      @score = { human: 0, computer: 0, round: 1 }
+
+      display_result
       break unless play_again?
+      reset
+      display_play_again_message
     end
+
     display_goodbye_message
   end
 
   private
 
-  def determine_round_winner
-    if human.move > computer.move
-      @score[:human] += 1
-      display_round_winner(human.name)
-    elsif computer.move > human.move
-      @score[:computer] += 1
-      display_round_winner(computer.name)
+  def display_welcome_message
+    puts "Welcome to Tic Tac Toe!"
+    puts ""
+  end
+
+  def display_goodbye_message
+    puts "Thanks for playing Tic Tac Toe! Goodbye!"
+  end
+
+  def clear_screen_and_display_board
+    clear
+    display_board
+  end
+
+  def human_turn?
+    @current_marker == HUMAN_MARKER
+  end
+
+  def display_board
+    puts "You're a #{human.marker}. Computer is a #{computer.marker}."
+    puts ""
+    board.draw
+    puts ""
+  end
+
+  def human_moves
+    puts "Choose an available square (#{board.unmarked_keys.join(', ')}): "
+    square = nil
+    loop do
+      square = gets.chomp.to_i
+      break if board.unmarked_keys.include?(square)
+      puts "Sorry, that's not a valid choice."
+    end
+
+    board[square] = human.marker
+  end
+
+  def computer_moves
+    board[board.unmarked_keys.sample] = computer.marker
+  end
+
+  def current_player_moves
+    if human_turn?
+      human_moves
+      @current_marker = COMPUTER_MARKER
     else
-      display_round_winner(nil)
+      computer_moves
+      @current_marker = HUMAN_MARKER
     end
   end
 
-    # Methods are arranged alphabetically
-    def display_goodbye_message
-      clear_screen
-      puts "Thanks, #{human.name}, for playing " \
-      "Rock, Paper, Scissors, lizard, spock. Goodbye!"
-    end
-  
-    def display_grand_winner
-      blank_line
-      grand_winner = @score.key(3)
-      if grand_winner == :human
-        puts "#{human.name} is the grand winner!"
-      else
-        puts "#{computer.name} is the grand winner!"
-      end
-    end
-  
-    def display_moves
-      clear_screen
-      blank_line
-      puts "#{human.name} chose #{human.move.value}."
-      puts "#{computer.name} chose #{computer.move.value}."
-      blank_line
-    end
-  
-    def display_move_history
-      puts "#{human.name}'s move history:"
-      @@move_history[human.name].each { |n| puts n }
-      puts "#{computer.name}'s move history:"
-      @@move_history[computer.name].each { |n| puts n }
-      wait_for_response
-    end
-  
-    def display_round_winner(winner)
-      if winner
-        puts "#{winner} won round #{@score[:round]}!"
-      else
-        puts "It's a tie!"
-      end
-  
-      @score[:round] += 1
-    end
-  
-    def display_score
-      blank_line
-      dashed_line
-      puts "#{human.name}: #{@score[:human]}"
-      puts "#{computer.name}: #{@score[:computer]}"
-      dashed_line
-      blank_line
-    end
-  
-    def display_welcome_message
-      clear_screen
-      blank_line
-      puts "#{human.name}, Welcome to Rock, Paper, Scissors, Lizard, Spock!"
-      sleep(3)
-    end
+  def display_result
+    clear_screen_and_display_board
 
-  def grand_winner?
-    return true if @quit == 'q' || @quit == 'quit'
-    @@move_history = { human.name => [], computer.name => [] }
-    @score.values[0..1].include? 3
+    case board.winning_marker
+    when human.marker
+      puts "You won!"
+    when computer.marker
+      puts "Computer won!"
+    else
+      puts "It's a tie!"
+    end
   end
 
   def play_again?
-    dashed_line
-    blank_line
     answer = nil
     loop do
-      puts "#{human.name}, Would you like to play again? (y)es or (n)o"
+      puts "Would you like to play again? (y/n)"
       answer = gets.chomp.downcase
-      break if %w(y n yes no).include? answer
-      puts "Sorry, answer must be (y)es or (n)o."
+      break if %w(y n).include? answer
+      puts "Sorry, must be y or n"
     end
 
-    answer == 'y' || answer == 'yes'
+    answer == 'y'
   end
 
-  def play_round
-    human.choose
-    computer.choose
-    display_moves
-    determine_round_winner
-    display_score
-    display_move_history
+  def clear
+    system "clear" || system "cls"
   end
 
-  def self.record_move_history(name, value)
-    @@move_history[name] << value
+  def reset
+    board.reset
+    @current_marker = FIRST_TO_MOVE
+    clear
   end
 
-  def wait_for_response
-    blank_line
-    puts "When you're ready to continue, press ENTER. Or type (q)uit to quit "
-    answer = gets.chomp.downcase
-    @quit = 'q' if answer == 'q' || answer == 'quit'
+  def display_play_again_message
+    puts "Let's play again!"
+    puts ""
   end
 end
 
-RPSGame.new.play
+game = TTTGame.new
+game.play
