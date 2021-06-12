@@ -2,6 +2,7 @@ class Board # methods in alphabetical order
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # columns
                   [[1, 5, 9], [3, 5, 7]]              # diagonals
+  CENTER_SQUARE = 5
 
   attr_accessor :squares
 
@@ -59,8 +60,8 @@ class Board # methods in alphabetical order
     nil
   end
 
-  def square_five_empty?
-    unmarked_keys.include? 5
+  def center_square_empty?
+    unmarked_keys.include? CENTER_SQUARE
   end
 
   def unmarked_keys
@@ -136,13 +137,23 @@ class Human < Player
 
   def set_name
     clear_screen
-    puts "Hello, what would you like to be called?"
-    @name = gets.chomp
+    loop do
+      puts "Hello, what would you like to be called?"
+      @name = gets.chomp
+      break if !name.empty?
+      puts "You must enter a name!"
+    end
   end
 
   def set_marker
-    puts "#{@name}, please choose a marker:"
-    self.marker = gets.chomp
+    clear_screen
+    loop do
+      puts "#{name}, please choose a marker: "
+      puts "Must be only 1 digit and cannot be either 'O' or 'o'"
+      self.marker = gets.chomp
+      break if self.marker.size == 1 && !%w(O o).include?(self.marker)
+      puts "You must enter a valid marker!"
+    end
   end
 end
 
@@ -159,31 +170,36 @@ class Computer < Player
 end
 
 class Score
-  @@score = { human: 0, computer: 0 }
+  attr_accessor :score
 
-  def self.add_point(player)
-    @@score[player] += 1
+  def initialize
+    @score = { human: 0, computer: 0 }
   end
 
-  def self.get(player)
-    @@score[player]
+  def add_point(player)
+    score[player] += 1
   end
 
-  def self.total
-    @@score
+  def get(player)
+    score[player]
   end
 
-  def self.reset
-    @@score = { human: 0, computer: 0 }
+  def total
+    score
+  end
+
+  def reset
+    @score = { human: 0, computer: 0 }
   end
 end
 
 class TTTGame
   attr_reader :human, :computer, :human_marker, :computer_marker
-  attr_accessor :board
+  attr_accessor :board, :score
 
   def initialize
     @board = Board.new
+    @score = Score.new
     @human = Human.new
     @computer = Computer.new
     @human_marker = human.marker
@@ -279,7 +295,7 @@ class TTTGame
       break if board.unmarked_keys.include? square
       puts "Sorry, that's not a valid choice - please choose again."
     end
-    board[square] = @human_marker
+    board[square] = human_marker
   end
 
   def computer_moves
@@ -287,8 +303,8 @@ class TTTGame
                board.find_at_risk_square(@computer_marker)
              elsif board.at_risk_square?(@human_marker)
                board.find_at_risk_square(@human_marker)
-             elsif board.square_five_empty?
-               5
+             elsif board.center_square_empty?
+               Board::CENTER_SQUARE
              else
                board.unmarked_keys.sample
              end
@@ -305,14 +321,14 @@ class TTTGame
 
   def record_score
     case board.winning_marker
-    when human_marker then Score.add_point(:human)
-    when computer_marker then Score.add_point(:computer)
+    when human_marker then score.add_point(:human)
+    when computer_marker then score.add_point(:computer)
     end
   end
 
   def grand_winner?
     return true if @quit
-    Score.total.values.include? 5
+    score.total.values.include? 5
   end
 
   def play_again?
@@ -339,7 +355,7 @@ class TTTGame
   def display_welcome_message
     puts "Welcome, #{human.name}, to Tic Tac Toe!"
     puts ''
-    puts "The object of the game is to get 3 'X's in a row, in any direction."
+    puts "The object of the game is to get 3 of your markers in a row, in any direction."
     puts "You also have to keep the computer from getting 3 'O's in a row."
     puts ''
     puts "The first player to win 5 games is the Grand Winner."
@@ -361,8 +377,8 @@ class TTTGame
 
   def display_board
     puts "You're a #{human_marker} and #{computer.name} is a #{computer_marker}"
-    puts "The score is: You: #{Score.get(:human)}   " \
-          "#{computer.name}: #{Score.get(:computer)}"
+    puts "The score is: You: #{score.get(:human)}   " \
+          "#{computer.name}: #{score.get(:computer)}"
     board.draw
   end
 
@@ -419,7 +435,7 @@ class TTTGame
   def reset_all
     @current_marker = nil
     board.reset
-    Score.reset
+    score.reset
     @winner = nil
     @quit = nil
     clear
